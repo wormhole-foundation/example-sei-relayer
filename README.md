@@ -2,7 +2,7 @@
 
 ## Off-Chain Relayers
 
-See the relayer [README.md](./relayer/README.md) file.
+See the relayer [README.md](./RELAYER_README.md) file.
 
 ## Design
 
