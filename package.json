@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@certusone/wormhole-sdk": "^0.9.11",
-    "@wormhole-foundation/relayer-engine": "file:../",
+    "@wormhole-foundation/relayer-engine": "github:wormhole-foundation/relayer-engine",
     "koa": "^2.14.1",
     "koa-router": "^12.0.0",
     "node-redis": "^0.1.7",
