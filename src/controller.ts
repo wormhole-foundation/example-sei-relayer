@@ -20,9 +20,14 @@ export class ApiController {
 
   async setup() {
     // setup sei wallet and client
-    this.seiWallet = await DirectSecp256k1HdWallet.fromMnemonic(this.seiMnemonic);
+    this.seiWallet = await DirectSecp256k1HdWallet.fromMnemonic(this.seiMnemonic,
+      {
+        prefix: "sei"
+      }
+    );
     [this.seiAccount] = await this.seiWallet.getAccounts();
     this.seiClient = await getSeiSigningWasmClient(this.seiWallet);
+    console.log(`initialized sei wallet: ${this.seiAccount.address}`);
   }
 
   preFilter(vaa: ParsedVaaWithBytes): boolean {
