@@ -13,7 +13,7 @@ import {
   TokenBridgeContext,
   WalletContext,
 } from "@wormhole-foundation/relayer-engine";
-import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_POLYGON, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
@@ -31,6 +31,7 @@ const SUPPORTED_SOURCE_CHAINS = [
   CHAIN_ID_ETH,
   CHAIN_ID_ARBITRUM,
   CHAIN_ID_OPTIMISM,
+  CHAIN_ID_POLYGON,
 ];
 
 // You need to read in your keys
@@ -40,6 +41,7 @@ const SUPPORTED_SOURCE_CHAINS = [
 
 async function main() {
   let opts: any = yargs(process.argv.slice(2)).argv;
+  opts.logger = rootLogger;
 
   const env = Environment.TESTNET;
   const app = new StandardRelayerApp<MyRelayerContext>(env, opts);
@@ -53,10 +55,6 @@ async function main() {
     SUPPORTED_SOURCE_CHAINS,
     fundsCtrl.processFundsTransfer
   );
-
-  app.use(async (err, ctx, next) => {
-    ctx.logger.error("error middleware triggered");
-  }); // <-- if you pass in a function with 3 args, it'll be used to process errors (whenever you throw from your middleware)
 
   app.listen();
   runUI(app, opts, rootLogger);
