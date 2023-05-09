@@ -1,27 +1,22 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import yargs from "yargs";
 import * as Koa from "koa";
 import {
-  Context,
   Environment,
-  logging,
   LoggingContext,
-  missedVaas,
-  providers,
-  RelayerApp,
-  sourceTx,
   SourceTxContext,
-  stagingArea,
   StagingAreaContext,
+  StandardRelayerApp,
   StorageContext,
   TokenBridgeContext,
-  tokenBridgeContracts,
   WalletContext,
 } from "@wormhole-foundation/relayer-engine";
-import { CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_AVAX, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
-import { RedisStorage } from "../../relayer/storage/redis-storage";
 
 export type MyRelayerContext = LoggingContext &
   StorageContext &
@@ -39,74 +34,51 @@ async function main() {
   let opts: any = yargs(process.argv.slice(2)).argv;
 
   const env = Environment.TESTNET;
-  const app = new RelayerApp<MyRelayerContext>(env);
-  const fundsCtrl = new ApiController();
+  const app = new StandardRelayerApp<MyRelayerContext>(env, opts);
+  const fundsCtrl = await buildApiController();
 
-  // Config
-  const store = new RedisStorage({
-    attempts: 3,
-    namespace: "simple",
-    queueName: "relays",
-  });
-  configRelayer(app, store);
+  // prefilter vaas before they get put in the queue
+  app.filter(fundsCtrl.preFilter);
 
-  // Set up middleware
-  app.use(logging(rootLogger)); // <-- logging middleware
-  app.use(missedVaas(app, { namespace: "simple", logger: rootLogger }));
-  app.use(providers());
-  // app.use(wallets({ logger: rootLogger, namespace: "simple", privateKeys })); // <-- you need a valid private key to turn on this middleware
-  app.use(tokenBridgeContracts());
-  app.use(stagingArea());
-  app.use(sourceTx());
-
-  app
-    .chain(CHAIN_ID_SOLANA)
-    .address(
-      "DZnkkTmCiFWfYTfT41X3Rd1kDgozqzxWaHqsw6W4x2oe",
-      fundsCtrl.processFundsTransfer
-    );
-
-  // Another way to do it if you want to listen to multiple addresses on different chaints:
-  // app.multiple(
-  //   { [CHAIN_ID_SOLANA]: "DZnkkTmCiFWfYTfT41X3Rd1kDgozqzxWaHqsw6W4x2oe"
-  //     [CHAIN_ID_ETH]: ["0xabc1230000000...","0xdef456000....."]
-  //   },
-  //   fundsCtrl.processFundsTransfer
-  // );
+  // listen to token bridge contracts
+  app.tokenBridge(
+    [CHAIN_ID_AVAX, CHAIN_ID_SOLANA],
+    fundsCtrl.processFundsTransfer
+  );
 
   app.use(async (err, ctx, next) => {
     ctx.logger.error("error middleware triggered");
   }); // <-- if you pass in a function with 3 args, it'll be used to process errors (whenever you throw from your middleware)
 
   app.listen();
-  runUI(app, store, opts, rootLogger);
+  runUI(app, opts, rootLogger);
 }
 
-function configRelayer<T extends Context>(
-  app: RelayerApp<T>,
-  store: RedisStorage
-) {
-  app.spy("localhost:7073");
-  app.useStorage(store);
-  app.logger(rootLogger);
+async function buildApiController(): Promise<ApiController> {
+  const seiMnemonic = process.env.SEI_MNEMONIC;
+  if (!seiMnemonic) {
+    throw new Error("sei mnemonic required");
+  }
+  const controller = new ApiController(seiMnemonic);
+  await controller.setup();
+  return controller;
 }
 
 function runUI(
-  relayer: RelayerApp<any>,
-  store: RedisStorage,
+  relayerApp: StandardRelayerApp<any>,
   { port }: any,
   logger: Logger
 ) {
   const app = new Koa();
+  app.use(relayerApp.storageKoaUI("/ui"));
 
-  app.use(store.storageKoaUI("/ui"));
   app.use(async (ctx, next) => {
     if (ctx.request.method !== "GET" && ctx.request.url !== "/metrics") {
       await next();
       return;
     }
 
-    ctx.body = await store.registry.metrics();
+    ctx.body = await relayerApp.metricsRegistry.metrics();
   });
 
   port = Number(port) || 3000;
