@@ -13,7 +13,7 @@ import {
   TokenBridgeContext,
   WalletContext,
 } from "@wormhole-foundation/relayer-engine";
-import { CHAIN_ID_AVAX, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
@@ -24,6 +24,14 @@ export type MyRelayerContext = LoggingContext &
   TokenBridgeContext &
   StagingAreaContext &
   WalletContext;
+
+const SUPPORTED_SOURCE_CHAINS = [
+  CHAIN_ID_AVAX,
+  CHAIN_ID_SOLANA,
+  CHAIN_ID_ETH,
+  CHAIN_ID_ARBITRUM,
+  CHAIN_ID_OPTIMISM,
+];
 
 // You need to read in your keys
 // const privateKeys = {
@@ -42,7 +50,7 @@ async function main() {
 
   // listen to token bridge contracts
   app.tokenBridge(
-    [CHAIN_ID_AVAX, CHAIN_ID_SOLANA],
+    SUPPORTED_SOURCE_CHAINS,
     fundsCtrl.processFundsTransfer
   );
 
