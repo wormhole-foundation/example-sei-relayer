@@ -4,7 +4,6 @@ dotenv.config();
 import yargs from "yargs";
 import * as Koa from "koa";
 import {
-  Environment,
   LoggingContext,
   SourceTxContext,
   StagingAreaContext,
@@ -18,6 +17,8 @@ import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
 import { CONFIG } from "./consts";
+import Router from "koa-router";
+import { Context, Next } from "koa";
 
 export type MyRelayerContext = LoggingContext &
   StorageContext &
@@ -57,7 +58,7 @@ async function main() {
   );
 
   app.listen();
-  runUI(app, opts, rootLogger);
+  runAPI(app, opts, rootLogger);
 }
 
 async function buildApiController(): Promise<ApiController> {
@@ -70,22 +71,27 @@ async function buildApiController(): Promise<ApiController> {
   return controller;
 }
 
-function runUI(
+function runAPI(
   relayerApp: StandardRelayerApp<any>,
   { port }: any,
   logger: Logger
 ) {
   const app = new Koa();
-  app.use(relayerApp.storageKoaUI("/ui"));
+  const router = new Router();
 
-  app.use(async (ctx, next) => {
-    if (ctx.request.method !== "GET" && ctx.request.url !== "/metrics") {
-      await next();
-      return;
-    }
-
+  router.get(`/metrics`, async (ctx, next) => {
     ctx.body = await relayerApp.metricsRegistry.metrics();
   });
+
+  router.post(
+    `/vaas/:emitterChain/:emitterAddress/:sequence`,
+    reprocessVaaById(rootLogger, relayerApp)
+  );
+
+  app.use(relayerApp.storageKoaUI("/ui"));
+
+  app.use(router.routes());
+  app.use(router.allowedMethods());
 
   port = Number(port) || 3000;
   app.listen(port, () => {
@@ -93,6 +99,25 @@ function runUI(
     logger.info(`For the UI, open http://localhost:${port}/ui`);
     logger.info("Make sure Redis is running on port 6379 by default");
   });
+}
+
+function reprocessVaaById(rootLogger: Logger, relayer: StandardRelayerApp) {
+  return async (ctx: Context, _next: Next) => {
+    const { emitterChain, emitterAddress, sequence } = ctx.params;
+    const logger = rootLogger.child({
+      emitterChain,
+      emitterAddress,
+      sequence,
+    });
+    logger.info("fetching vaa requested by API");
+    let vaa = await relayer.fetchVaa(emitterChain, emitterAddress, sequence);
+    if (!vaa) {
+      logger.error("fetching vaa requested by API");
+      return;
+    }
+    relayer.processVaa(Buffer.from(vaa.bytes));
+    ctx.body = "Processing";
+  };
 }
 
 main();
