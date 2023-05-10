@@ -1,16 +1,16 @@
 import { getCosmWasmClient, getQueryClient, getSigningCosmWasmClient } from "@sei-js/core";
 import { fromUint8Array } from "js-base64";
-import { SEI_CHAIN_CONFIGURATION } from "./consts";
+import { CONFIG } from "./consts";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 
 export const getSeiWasmClient = () =>
-  getCosmWasmClient(SEI_CHAIN_CONFIGURATION.rpcUrl);
+  getCosmWasmClient(CONFIG.seiConfiguration.rpcUrl);
 
 export const getSeiSigningWasmClient = async (wallet: DirectSecp256k1HdWallet) =>
-  getSigningCosmWasmClient(SEI_CHAIN_CONFIGURATION.rpcUrl, wallet);
+  getSigningCosmWasmClient(CONFIG.seiConfiguration.rpcUrl, wallet);
 
 export const getSeiQueryClient = () =>
-  getQueryClient(SEI_CHAIN_CONFIGURATION.restUrl);
+  getQueryClient(CONFIG.seiConfiguration.restUrl);
 
 export type CosmWasmClient = {
   queryContractSmart: (address: string, queryMsg: any) => Promise<any>;

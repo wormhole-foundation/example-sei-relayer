@@ -1,14 +1,29 @@
-import {
-  cosmos
-} from "@certusone/wormhole-sdk";
+import { Environment } from "@wormhole-foundation/relayer-engine";
 
-export const SEI_CHAIN_CONFIGURATION = {
-  chainId: "atlantic-2",
-  restUrl: "https://rest.atlantic-2.seinetwork.io/",
-  rpcUrl: "https://rpc.atlantic-2.seinetwork.io/",
+declare type Config = {
+  environment: Environment,
+  seiConfiguration: {
+    chainId: string,
+    restUrl: string,
+    rpcUrl: string,
+    seiTranslator: string,
+  },
 };
 
-export const SEI_TRANSLATOR =
-  "sei1dkdwdvknx0qav5cp5kw68mkn3r99m3svkyjfvkztwh97dv2lm0ksj6xrak";
-export const SEI_TRANSLATER_TARGET = cosmos.canonicalAddress(SEI_TRANSLATOR);
-export const SEI_DECIMALS = 6;
+export const CONFIG: Config = process.env.NODE_ENVIRONMENT === "production" ? {
+  environment: Environment.MAINNET,
+  seiConfiguration: {
+    chainId: "TODO FILL OUT",
+    restUrl: "TODO FILL OUT",
+    rpcUrl: "TODO FILL OUT",
+    seiTranslator: "TODO FILL OUT"
+  },
+} : {
+  environment: Environment.TESTNET,
+  seiConfiguration: {
+    chainId: "atlantic-2",
+    restUrl: "https://rest.atlantic-2.seinetwork.io/",
+    rpcUrl: "https://rpc.atlantic-2.seinetwork.io/",
+    seiTranslator: "sei1dkdwdvknx0qav5cp5kw68mkn3r99m3svkyjfvkztwh97dv2lm0ksj6xrak"
+  },
+};

@@ -17,6 +17,7 @@ import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAI
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
+import { CONFIG } from "./consts";
 
 export type MyRelayerContext = LoggingContext &
   StorageContext &
@@ -43,8 +44,7 @@ async function main() {
   let opts: any = yargs(process.argv.slice(2)).argv;
   opts.logger = rootLogger;
 
-  const env = Environment.TESTNET;
-  const app = new StandardRelayerApp<MyRelayerContext>(env, opts);
+  const app = new StandardRelayerApp<MyRelayerContext>(CONFIG.environment, opts);
   const fundsCtrl = await buildApiController();
 
   // prefilter vaas before they get put in the queue

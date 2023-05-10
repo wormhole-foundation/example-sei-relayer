@@ -5,8 +5,8 @@ import { calculateFee } from "@cosmjs/stargate";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromUint8Array } from "js-base64";
 import { getSeiSigningWasmClient } from "./sei";
-import { SEI_TRANSLATOR } from "./consts";
 import { DirectSecp256k1HdWallet, AccountData } from "@cosmjs/proto-signing";
+import { CONFIG } from "./consts";
 
 export class ApiController {
   private seiMnemonic: string;
@@ -64,7 +64,7 @@ export class ApiController {
     const fee = calculateFee(750000, "0.1usei");
     const tx = await this.seiClient.execute(
       this.seiAccount.address,
-      SEI_TRANSLATOR,
+      CONFIG.seiConfiguration.seiTranslator,
       msg,
       fee,
       "Wormhole - Complete Transfer"
