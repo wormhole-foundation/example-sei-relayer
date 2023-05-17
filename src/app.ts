@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import yargs from "yargs";
-import * as Koa from "koa";
+import Koa from "koa";
 import {
   LoggingContext,
   SourceTxContext,

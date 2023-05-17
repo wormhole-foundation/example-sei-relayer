@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
     "outDir": "build",
     "target": "ESNext",
     "module": "CommonJS",
@@ -9,15 +10,16 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
+    "emitDecoratorMetadata": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true
+    "sourceMap": true
   },
-  "include": ["../src"],
+  "include": ["src"],
   "exclude": [
     "node_modules",
     "relayer/lib/**/*",
