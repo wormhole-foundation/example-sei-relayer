@@ -38,7 +38,7 @@ const SUPPORTED_SOURCE_CHAINS = [
 
 // You need to read in your keys
 const privateKeys = {
-  [CHAIN_ID_SEI]: [process.env.SEI_MNEMONIC],
+  [CHAIN_ID_SEI]: process.env.SEI_MNEMONICS.split(","),
 };
 
 async function main() {
