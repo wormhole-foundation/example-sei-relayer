@@ -1,11 +1,29 @@
-import { Next } from "@wormhole-foundation/relayer-engine";
+import { Next, ParsedVaaWithBytes } from "@wormhole-foundation/relayer-engine";
 import { MyRelayerContext } from "./app";
 import { calculateFee } from "@cosmjs/stargate";
 import { fromUint8Array } from "js-base64";
 import { getSeiSigningWasmClient } from "./sei";
 import { CONFIG } from "./consts";
+import { CHAIN_ID_SEI, TokenBridgePayload, parseTokenTransferPayload } from "@certusone/wormhole-sdk";
 
 export class ApiController {
+  preFilter(vaa: ParsedVaaWithBytes): boolean {
+    const payload = parseTokenTransferPayload(vaa.payload);
+
+    // 1. Make sure it's a token transfer payload3 VAA
+    if (payload.payloadType !== TokenBridgePayload.TransferWithPayload) {
+      return false;
+    }
+
+    // 2. Make sure it's going to Sei
+    if (payload.toChain !== CHAIN_ID_SEI) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   processFundsTransfer = async (ctx: MyRelayerContext, next: Next) => {
     ctx.wallets.onSei(async (wallet, chainId) => {
 

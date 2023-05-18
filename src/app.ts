@@ -46,7 +46,7 @@ async function main() {
   opts.logger = rootLogger;
 
   const app = new StandardRelayerApp<MyRelayerContext>(CONFIG.environment, opts);
-  const fundsCtrl = await buildApiController();
+  const fundsCtrl = new ApiController();
 
   // prefilter vaas before they get put in the queue
   app.filter(fundsCtrl.preFilter);
@@ -59,16 +59,6 @@ async function main() {
 
   app.listen();
   runAPI(app, opts, rootLogger);
-}
-
-async function buildApiController(): Promise<ApiController> {
-  const seiMnemonic = process.env.SEI_MNEMONIC;
-  if (!seiMnemonic) {
-    throw new Error("sei mnemonic required");
-  }
-  const controller = new ApiController(seiMnemonic);
-  await controller.setup();
-  return controller;
 }
 
 function runAPI(
