@@ -12,7 +12,7 @@ import {
   TokenBridgeContext,
   WalletContext,
 } from "@wormhole-foundation/relayer-engine";
-import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_POLYGON, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_POLYGON, CHAIN_ID_SEI, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
@@ -37,13 +37,14 @@ const SUPPORTED_SOURCE_CHAINS = [
 ];
 
 // You need to read in your keys
-// const privateKeys = {
-//   [CHAIN_ID_ETH]: [process.env.ETH_KEY],
-// };
+const privateKeys = {
+  [CHAIN_ID_SEI]: [process.env.SEI_MNEMONIC],
+};
 
 async function main() {
   let opts: any = yargs(process.argv.slice(2)).argv;
   opts.logger = rootLogger;
+  opts.privateKeys = privateKeys;
 
   const app = new StandardRelayerApp<MyRelayerContext>(CONFIG.environment, opts);
   const fundsCtrl = new ApiController();
