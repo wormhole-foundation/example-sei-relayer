@@ -25,7 +25,7 @@ export class ApiController {
 
 
   processFundsTransfer = async (ctx: MyRelayerContext, next: Next) => {
-    ctx.wallets.onSei(async (wallet, chainId) => {
+    await ctx.wallets.onSei(async (wallet, chainId) => {
 
       // get signed VAA bytes
       const signedVaa = ctx.vaaBytes;
