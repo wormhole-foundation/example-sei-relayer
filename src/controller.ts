@@ -41,14 +41,13 @@ export class ApiController {
           vaa: fromUint8Array(signedVaa),
         },
       };
-      const fee = calculateFee(1000000, "0.1usei");
 
       const signingClient = await getSeiSigningWasmClient(wallet.wallet);
       const tx = await signingClient.execute(
         wallet.address,
         CONFIG.seiConfiguration.seiTranslator,
         msg,
-        fee,
+        "auto",
         "Wormhole - Complete Transfer"
       );
   
