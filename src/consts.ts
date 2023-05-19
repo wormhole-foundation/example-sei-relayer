@@ -22,8 +22,8 @@ export const CONFIG: Config = process.env.NODE_ENVIRONMENT === "production" ? {
   environment: Environment.TESTNET,
   seiConfiguration: {
     chainId: "atlantic-2",
-    restUrl: "https://rest.atlantic-2.seinetwork.io/",
-    rpcUrl: "https://rpc.atlantic-2.seinetwork.io/",
+    restUrl: "https://sei-testnet-api.polkachu.com",
+    rpcUrl: "https://sei-testnet-rpc.polkachu.com",
     seiTranslator: "sei1dkdwdvknx0qav5cp5kw68mkn3r99m3svkyjfvkztwh97dv2lm0ksj6xrak"
   },
 };
