@@ -12,7 +12,7 @@ import {
   TokenBridgeContext,
   WalletContext,
 } from "@wormhole-foundation/relayer-engine";
-import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_POLYGON, CHAIN_ID_SEI, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_ARBITRUM, CHAIN_ID_AVAX, CHAIN_ID_BSC, CHAIN_ID_ETH, CHAIN_ID_OPTIMISM, CHAIN_ID_POLYGON, CHAIN_ID_SEI, CHAIN_ID_SOLANA } from "@certusone/wormhole-sdk";
 import { rootLogger } from "./log";
 import { ApiController } from "./controller";
 import { Logger } from "winston";
@@ -34,11 +34,12 @@ const SUPPORTED_SOURCE_CHAINS = [
   CHAIN_ID_ARBITRUM,
   CHAIN_ID_OPTIMISM,
   CHAIN_ID_POLYGON,
+  CHAIN_ID_BSC,
 ];
 
 // You need to read in your keys
 const privateKeys = {
-  [CHAIN_ID_SEI]: process.env.SEI_MNEMONICS.split(","),
+  [CHAIN_ID_SEI]: process.env.SEI_KEYS.split(","),
 };
 
 async function main() {

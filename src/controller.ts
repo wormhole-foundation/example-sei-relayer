@@ -51,7 +51,7 @@ export class ApiController {
         fee,
         "Wormhole - Complete Transfer"
       );
-  
+
       ctx.logger.info(`Submitted complete transfer to Sei with hash ${tx.transactionHash}`);
     });
 
