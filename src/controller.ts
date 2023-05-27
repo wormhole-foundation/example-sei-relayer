@@ -44,6 +44,20 @@ export class ApiController {
       const fee = calculateFee(1000000, "0.1usei");
 
       const signingClient = await getSeiSigningWasmClient(wallet.wallet);
+
+      // safety isAlreadyRedeemed check will, in some cases, prevent us from submitting a duplicate message that
+      // a different external relayer may have already submitting.
+      const alreadyRedeemed = await signingClient.queryContractSmart(ctx.tokenBridge.addresses.sei, {
+        is_vaa_redeemed: {
+          vaa: fromUint8Array(ctx.vaaBytes),
+        },
+      });
+      if (alreadyRedeemed) {
+        ctx.logger.info("VAA to Sei seen but already redeemed... skipping");
+        await next();
+        return;
+      }
+
       const tx = await signingClient.execute(
         wallet.address,
         CONFIG.seiConfiguration.seiTranslator,
