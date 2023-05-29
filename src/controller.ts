@@ -52,7 +52,7 @@ export class ApiController {
           vaa: fromUint8Array(ctx.vaaBytes),
         },
       });
-      if (alreadyRedeemed) {
+      if (alreadyRedeemed.is_redeemed) {
         ctx.logger.info("VAA to Sei seen but already redeemed... skipping");
         await next();
         return;
