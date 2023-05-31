@@ -61,6 +61,7 @@ async function main() {
 
   app.listen();
   runAPI(app, opts, rootLogger);
+  runMetrics(app, opts, rootLogger);
 }
 
 function runAPI(
@@ -90,6 +91,27 @@ function runAPI(
     logger.info(`Running on ${port}...`);
     logger.info(`For the UI, open http://localhost:${port}/ui`);
     logger.info("Make sure Redis is running on port 6379 by default");
+  });
+}
+
+function runMetrics(
+  relayerApp: StandardRelayerApp<any>,
+  { metricsPort }: any,
+  logger: Logger
+) {
+  const app = new Koa();
+  const router = new Router();
+
+  router.get(`/metrics`, async (ctx, next) => {
+    ctx.body = await relayerApp.metricsRegistry.metrics();
+  });
+
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+
+  const port = Number(metricsPort) || 3001;
+  app.listen(port, () => {
+    logger.info(`Exposing metrics on ${port}...`);
   });
 }
 
