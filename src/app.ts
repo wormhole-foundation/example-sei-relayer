@@ -66,7 +66,6 @@ async function main() {
 
 function runAPI(
   relayerApp: StandardRelayerApp<any>,
-  { port }: any,
   logger: Logger
 ) {
   const app = new Koa();
@@ -86,7 +85,7 @@ function runAPI(
   app.use(router.routes());
   app.use(router.allowedMethods());
 
-  port = Number(port) || 3000;
+  port = process.env.SEI_UI_PORT || 3000;
   app.listen(port, "127.0.0.1", () => {
     logger.info(`Running on ${port}...`);
     logger.info(`For the UI, open http://localhost:${port}/ui`);
@@ -96,7 +95,6 @@ function runAPI(
 
 function runMetrics(
   relayerApp: StandardRelayerApp<any>,
-  { metricsPort }: any,
   logger: Logger
 ) {
   const app = new Koa();
@@ -109,7 +107,7 @@ function runMetrics(
   app.use(router.routes());
   app.use(router.allowedMethods());
 
-  const port = Number(metricsPort) || 3001;
+  const port = process.env.SEI_METRICS_PORT || 3001;
   app.listen(port, () => {
     logger.info(`Exposing metrics on ${port}...`);
   });
