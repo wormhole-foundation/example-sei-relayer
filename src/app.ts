@@ -86,7 +86,7 @@ function runAPI(
   app.use(router.allowedMethods());
 
   port = process.env.SEI_UI_PORT || 3000;
-  app.listen(port, "127.0.0.1", () => {
+  app.listen(port, process.env.SEI_BIND_IP || "127.0.0.1", () => {
     logger.info(`Running on ${port}...`);
     logger.info(`For the UI, open http://localhost:${port}/ui`);
     logger.info("Make sure Redis is running on port 6379 by default");
