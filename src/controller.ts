@@ -41,7 +41,7 @@ export class ApiController {
           vaa: fromUint8Array(signedVaa),
         },
       };
-      const fee = calculateFee(1000000, "0.1usei");
+      const fee = calculateFee(1000000, "0.01usei");
 
       const signingClient = await getSeiSigningWasmClient(wallet.wallet);
 
