@@ -10,12 +10,7 @@ export class ApiController {
   preFilter(vaa: ParsedVaaWithBytes): boolean {
     const payload = parseTokenTransferPayload(vaa.payload);
 
-    // 1. Make sure it's a token transfer payload3 VAA
-    if (payload.payloadType !== TokenBridgePayload.TransferWithPayload) {
-      return false;
-    }
-
-    // 2. Make sure it's going to Sei
+    // 1. Make sure it's going to Sei
     if (payload.toChain !== CHAIN_ID_SEI) {
       return false;
     }
@@ -35,21 +30,14 @@ export class ApiController {
         return;
       }
 
-      // submit the VAA to the Sei token_translator contract
-      const msg = {
-        complete_transfer_and_convert: {
-          vaa: fromUint8Array(signedVaa),
-        },
-      };
       const fee = calculateFee(1000000, "0.01usei");
-
       const signingClient = await getSeiSigningWasmClient(wallet.wallet);
 
       // safety isAlreadyRedeemed check will, in some cases, prevent us from submitting a duplicate message that
       // a different external relayer may have already submitting.
       const alreadyRedeemed = await signingClient.queryContractSmart(ctx.tokenBridge.addresses.sei, {
         is_vaa_redeemed: {
-          vaa: fromUint8Array(ctx.vaaBytes),
+          vaa: fromUint8Array(signedVaa),
         },
       });
       if (alreadyRedeemed.is_redeemed) {
@@ -58,15 +46,42 @@ export class ApiController {
         return;
       }
 
-      const tx = await signingClient.execute(
-        wallet.address,
-        CONFIG.seiConfiguration.seiTranslator,
-        msg,
-        fee,
-        "Wormhole - Complete Transfer"
-      );
+      // check the payload type
+      if (ctx.tokenBridge.payload.payloadType === TokenBridgePayload.TransferWithPayload) {
+        // if it's payload3, then submit the VAA to the token translator contract
+        const msg = {
+          complete_transfer_and_convert: {
+            vaa: fromUint8Array(signedVaa),
+          },
+        };
 
-      ctx.logger.info(`Submitted complete transfer to Sei with hash ${tx.transactionHash}`);
+        const tx = await signingClient.execute(
+          wallet.address,
+          CONFIG.seiConfiguration.seiTranslator,
+          msg,
+          fee,
+          "Wormhole - Complete Token Translator Transfer"
+        );
+
+        ctx.logger.info(`Submitted complete transfer to Sei with hash ${tx.transactionHash}`);
+      } else {
+        // it's a normal token transfer payload, so submit the VAA directly to token bridge contract
+        const msg = {
+          submit_vaa: {
+            data: fromUint8Array(signedVaa),
+          },
+        };
+
+        const tx = await signingClient.execute(
+          wallet.address,
+          ctx.tokenBridge.addresses.sei,
+          msg,
+          fee,
+          "Wormhole - Complete Transfer"
+        );
+
+        ctx.logger.info(`Submitted complete transfer to Sei with hash ${tx.transactionHash}`);
+      }
     });
 
     // continue to next middleware
