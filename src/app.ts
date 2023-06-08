@@ -71,16 +71,12 @@ function runAPI(
   const app = new Koa();
   const router = new Router();
 
-  router.get(`/metrics`, async (ctx, next) => {
-    ctx.body = await relayerApp.metricsRegistry.metrics();
-  });
-
   router.post(
     `/vaas/:emitterChain/:emitterAddress/:sequence`,
     reprocessVaaById(rootLogger, relayerApp)
   );
 
-  app.use(relayerApp.storageKoaUI("/ui"));
+  app.use(relayerApp.storageKoaUI("/"));
 
   app.use(router.routes());
   app.use(router.allowedMethods());
@@ -88,7 +84,7 @@ function runAPI(
   const port = Number(process.env.SEI_UI_PORT) || 3000;
   app.listen(port, process.env.SEI_BIND_IP || "127.0.0.1", () => {
     logger.info(`Running on ${port}...`);
-    logger.info(`For the UI, open http://localhost:${port}/ui`);
+    logger.info(`For the UI, open http://localhost:${port}`);
     logger.info("Make sure Redis is running on port 6379 by default");
   });
 }
